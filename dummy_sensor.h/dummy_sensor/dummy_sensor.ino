@@ -3,12 +3,25 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 
+//Parameters 
 
 long randDifference;
-long sensorValue1 = 50;
 const char* PlantGroup = "Living Room Corner";    
-const char* Plant1 = "Fancy Ficus"; 
-const char* Sensor1 = "Moisture" ; 
+
+// Sensor 1 Struct //
+
+struct sensor
+{
+  long Value;
+  const char* Plant; 
+  const char* Type; 
+  const int ID; 
+};
+
+struct sensor sensor1{50,"Fancy Ficus","Soil Moisture",1};
+// Sensor 2 
+
+// Sensor 2 end
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -45,34 +58,18 @@ void loop() {
     
 
 
-    // Serial.println(sensorValue1);
-    
+    // Serial.println(SensorValue);
+    Serial.print(sensor1.Plant);
       while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
     if (client.connect("arduinoClient")) {
       Serial.println("connected");
       
-    randDifference = random(-5, 11);
-    sensorValue1 = sensorValue1 + randDifference;
-    if (sensorValue1 <= 0) {
-      sensorValue1 = 0;
-    }
-    else if (sensorValue1 >= 100) {
-      sensorValue1 = 100;
-      }
-    else {
-    }
+    send(PlantGroup,sensor1.Plant,sensor1.Type,sensor1.ID,sensor1.Value);
+    sensor1.Value = dummy_value(sensor1.Value) ;
 
-    StaticJsonDocument<200> doc;
-    doc["PlantGroup"] = PlantGroup;
-    doc["Plant"] = Plant1;
-    doc["Sensor"] = Sensor1; 
-    doc["SensorValue"] = sensorValue1;
-    char buffer[256];
-    serializeJson(doc, buffer);
-    Serial.print(buffer);
-    client.publish("Plants", buffer);
+    // Add Additional Sensor Readings Here
     delay(1000);
     } else {
       Serial.print("failed, rc=");
@@ -82,4 +79,31 @@ void loop() {
       delay(500);
     }
   }
+}
+void send(const char* PlantGroup,const char* Plant,const char* Sensor,int Sensor_ID,int Sensor_Value)
+{
+    StaticJsonDocument<200> doc;
+    doc["PlantGroup"] = PlantGroup;
+    doc["Plant"] = Plant;
+    doc["Sensor"] = Sensor; 
+    doc["Sensor_ID"] = Sensor_ID; 
+    doc["SensorValue"] = Sensor_Value;
+    char buffer[256];
+    serializeJson(doc, buffer);
+    Serial.print(buffer);
+    client.publish("Plants", buffer);
+}
+
+int dummy_value(int currentValue){
+    randDifference = random(-5, 11);
+    currentValue = currentValue + randDifference;
+    if (currentValue <= 0) {
+      currentValue = 0;
+    }
+    else if (currentValue >= 100) {
+      currentValue = 100;
+      }
+    else {
+    }
+    return currentValue;
 }
