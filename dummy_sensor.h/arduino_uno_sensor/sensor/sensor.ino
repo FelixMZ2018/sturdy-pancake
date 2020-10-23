@@ -21,13 +21,20 @@ struct sensor
   const char* Plant; 
   const char* Type; 
   const int Hardware_ID; 
+  const bool avail;
 };
 
-struct sensor sensor1{50,"Fancy Ficus","Soil Moisture",1};
-struct sensor sensor2{50,"Magnificient Monstera","Soil Moisture",2};
-struct sensor sensor3{50,"Amazing Aloe","Soil Moisture",3};
-struct sensor sensor4{50,NULL,"Brightness",4};
-//Plant Name Group equals group sensor // 
+const int mplex1 = 5 ;
+const int mplex2 = 4 ;
+const int mplex3 = 12 ;
+const int mplex4 = 13 ;
+
+struct sensor sensor1{50,"Fancy Ficus","Soil Moisture",1,true};
+struct sensor sensor2{50,"Magnificient Monstera","Soil Moisture",2,true};
+struct sensor sensor3{50,"Amazing Aloe","Soil Moisture",3,true};
+struct sensor sensor4{50,"Dramatic Dragon Tree","Soil Moisture",5,false};
+struct sensor sensor5{50,NULL,"Brightness",5,false};
+//Plant Name Group equals group sensor //
 
 // Sensor 2 
 
@@ -63,6 +70,12 @@ void setup() {
   Serial.println(WiFi.localIP());         // Send the IP address of the ESP8266 to the computer
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   client.setServer(MQTTBROKER, 1883);
+  pinMode(5, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+
+
 }
 
 
@@ -77,20 +90,39 @@ void loop() {
     // Attempt to connect
     if (client.connect("arduinoClient")) {
       Serial.println("connected");
-        int sensorValue = analogRead(A0);
   // print out the value you read:
-  Serial.println(sensorValue);
-
-      
+    if (sensor1.avail == true) {
+    multiplex(LOW,LOW,LOW,LOW);
+    delay(50);
+    sensor1.Value = analogRead(A0);
     send(PlantGroup,sensor1.Plant,sensor1.Type,sensor1.Hardware_ID,sensor1.Value);
-    sensor1.Value = dummy_value(sensor1.Value) ;
+    delay(50);
+    }
+    if (sensor2.avail == true) {
+    multiplex(HIGH,LOW,LOW,LOW);
+    delay(50);
+    sensor2.Value = analogRead(A0);
     send(PlantGroup,sensor2.Plant,sensor2.Type,sensor2.Hardware_ID,sensor2.Value);
-    sensor2.Value = dummy_value(sensor2.Value) ;
-    send(PlantGroup,sensor3.Plant,sensor3.Type,sensor3.Hardware_ID,sensor3.Value);
-    sensor3.Value = dummy_value(sensor3.Value) ;
+    delay(50);
+    }
+    if (sensor3.avail == true) {
+      multiplex(LOW,HIGH,LOW,LOW);
+      delay(50);
+      sensor3.Value = analogRead(A0);
+      send(PlantGroup,sensor3.Plant,sensor3.Type,sensor3.Hardware_ID,sensor3.Value);
+    }
+    if (sensor4.avail == true) {
+    digitalWrite(0,LOW);
+    digitalWrite(1,LOW);
+    digitalWrite(2,HIGH);
+    digitalWrite(3,LOW);
+    sensor4.Value = analogRead(A0);
     send(PlantGroup,sensor4.Plant,sensor4.Type,sensor4.Hardware_ID,sensor4.Value);
-    sensor4.Value = dummy_value(sensor4.Value) ;
-    Serial.println(String(random(0xffffffff), HEX));
+    }
+    if (sensor4.avail == true) {
+    send(PlantGroup,sensor5.Plant,sensor5.Type,sensor5.Hardware_ID,sensor5.Value);
+    }
+    //Serial.println(String(random(0xffffffff), HEX));
 
 
     // Add Additional Sensor Readings Here
@@ -131,4 +163,10 @@ int dummy_value(int currentValue){
       }
     else {
     }
+}
+void multiplex(int pin1,int pin2,int pin3,int pin4){
+    digitalWrite(mplex1,pin1);
+    digitalWrite(mplex2,pin2);
+    digitalWrite(mplex3,pin3);
+    digitalWrite(mplex4,pin4);
 }
