@@ -16,9 +16,7 @@ const char* PlantGroup = "Living Room Corner";
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192, 168, 0, 51);
 IPAddress myDns(192, 168, 0, 1);
-
 IPAddress gateway(192, 168, 0, 1);
-
 IPAddress subnet(255, 255, 0, 0);
 // Sensor 1 Struct //
 
@@ -31,13 +29,21 @@ struct sensor
   const bool avail;
 };
 
+struct sensor_template
+{
+  const char* name;
+  const int* high;
+  const int* low;
+}; 
+
+struct sensor_template soil_moisture{"Soil Moisture",400,750};
+
 struct sensor sensor1{50,"Fancy Ficus","Soil Moisture",1,true};
 struct sensor sensor2{50,"Magnificient Monstera","Soil Moisture",2,true};
 struct sensor sensor3{50,"Amazing Aloe","Soil Moisture",3,true};
-struct sensor sensor4{50,"Dramatic Dragon Tree","Soil Moisture",5,true};
-struct sensor sensor5{50,"Beautiful Begonia","Soil Moisture",5,true};
-
-struct sensor sensor6{50,NULL,"Brightness",5,false};
+struct sensor sensor4{50,"Dramatic Dragon Tree","Soil Moisture",4,true};
+struct sensor sensor5{50,"Beautiful Begonia","Soil Moisture",5,false};
+struct sensor sensor6{50,NULL,"Brightness",6,true};
 //Plant Name Group equals group sensor //
 
 // Sensor 2 
@@ -76,6 +82,7 @@ void loop() {
   // print out the value you read:
     if (sensor1.avail == true) {
     sensor1.Value = analogRead(A0);
+    Serial.print(sensorread(analogRead(A0),soil_moisture.high,soil_moisture.low));
     send(PlantGroup,sensor1.Plant,sensor1.Type,sensor1.Hardware_ID,sensor1.Value);
     delay(50);
     }
@@ -85,14 +92,14 @@ void loop() {
     delay(50);
     }
     if (sensor3.avail == true) {
-      sensor3.Value = analogRead(A2);
-      send(PlantGroup,sensor3.Plant,sensor3.Type,sensor3.Hardware_ID,sensor3.Value);
+    sensor3.Value = analogRead(A2);
+    send(PlantGroup,sensor3.Plant,sensor3.Type,sensor3.Hardware_ID,sensor3.Value);
     }
     if (sensor4.avail == true) {
     sensor4.Value = analogRead(A3);
     send(PlantGroup,sensor4.Plant,sensor4.Type,sensor4.Hardware_ID,sensor4.Value);
     }
-    if (sensor4.avail == true) {
+    if (sensor5.avail == true) {
     send(PlantGroup,sensor5.Plant,sensor5.Type,sensor5.Hardware_ID,sensor5.Value);
     }
     //Serial.println(String(random(0xffffffff), HEX));
@@ -122,5 +129,11 @@ void send(const char* PlantGroup,const char* Plant,const char* Sensor,int Sensor
     char buffer[256];
     serializeJson(doc, buffer);
     Serial.println(buffer);
-    // client.publish("Plants", buffer);
+    client.publish("Plants", buffer);
 }
+ float sensorread (int reading, int high, int low) {
+    if (high < low){
+      return (100 - ((reading - high) * (high / low)));
+    } ;
+    
+};
