@@ -142,8 +142,7 @@ void send(const char* PlantGroup,const char* Plant,const char* Sensor,int Sensor
     client.publish("Plants", buffer);
 }
  float sensorread (int reading, const float high, const float low) {
-    if (high < low){
       return (1 - ((reading - high) / (low - high)));
-    } ;
+    }
     
 };
