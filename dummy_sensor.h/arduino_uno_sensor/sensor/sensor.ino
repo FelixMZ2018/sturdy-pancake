@@ -145,4 +145,3 @@ void send(const char* PlantGroup,const char* Plant,const char* Sensor,int Sensor
       return (1 - ((reading - high) / (low - high)));
     }
     
-};

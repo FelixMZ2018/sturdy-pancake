@@ -2,3 +2,4 @@ sturdy-pancake-sensor/dummy_sensor.h/dummy_sensor/secrets.h
 
 sturdy-pancake-sensor/dummy_sensor.h/esp_sensor/sensor/secrets.h
 sturdy-pancake-sensor/dummy_sensor.h/arduino_uno_sensor/sensor/secrets.h
+sturdy-pancake-sensor/arduino_uno_persistent/sensor/secrets.h
