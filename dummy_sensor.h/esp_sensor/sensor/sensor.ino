@@ -7,33 +7,30 @@
 // For Plant Sensors add the Plant name 
 // For Group Sensors add NULL as name
 
-
 //Parameters 
 
-long randDifference;
-const char* PlantGroup = "Living Room Corner";    
+const char* PlantGroup = "Living_Room_";
 
 // Sensor 1 Struct //
 
 struct sensor
 {
-  long Value;
-  const char* Plant; 
-  const char* Type; 
-  const int Hardware_ID; 
   const bool avail;
+  float value;
+  const int index;
 };
-
 const int mplex1 = 5 ;
 const int mplex2 = 4 ;
 const int mplex3 = 12 ;
 const int mplex4 = 13 ;
 
-struct sensor sensor1{50,"Fancy Ficus","Soil Moisture",1,true};
-struct sensor sensor2{50,"Magnificient Monstera","Soil Moisture",2,true};
-struct sensor sensor3{50,"Amazing Aloe","Soil Moisture",3,true};
-struct sensor sensor4{50,"Dramatic Dragon Tree","Soil Moisture",5,false};
-struct sensor sensor5{50,NULL,"Brightness",5,false};
+
+struct sensor sensor0{true ,NULL,0};
+struct sensor sensor1{true ,NULL,1};
+struct sensor sensor2{true ,NULL,2};
+struct sensor sensor3{true ,NULL,3};
+struct sensor sensor4{false ,NULL,4};
+
 //Plant Name Group equals group sensor //
 
 // Sensor 2 
@@ -74,7 +71,10 @@ void setup() {
   pinMode(4, OUTPUT);
   pinMode(12, OUTPUT);
   pinMode(13, OUTPUT);
-
+  digitalWrite(5,LOW);
+  digitalWrite(4,LOW);
+  digitalWrite(12,LOW);
+  digitalWrite(13,LOW);  
 
 }
 
@@ -83,7 +83,7 @@ void loop() {
     
 
 
-    // Serial.println(SensorValue);
+    // Serial.println(Sensorvalue);
     //Serial.print(sensor1.Plant);
       while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -91,42 +91,64 @@ void loop() {
     if (client.connect("arduinoClient")) {
       Serial.println("connected");
   // print out the value you read:
-    if (sensor1.avail == true) {
+    StaticJsonDocument<200> doc;
+    doc["Plant_Group"] = PlantGroup;
+    JsonArray sensor = doc.createNestedArray("sensor");
+    if (sensor0.avail == true) {
     multiplex(LOW,LOW,LOW,LOW);
+    digitalWrite(5,HIGH);
+    digitalWrite(4,HIGH);
+    digitalWrite(12,HIGH);
+    digitalWrite(13,HIGH);  
     delay(50);
-    sensor1.Value = analogRead(A0);
-    send(PlantGroup,sensor1.Plant,sensor1.Type,sensor1.Hardware_ID,sensor1.Value);
+    sensor0.value = analogRead(A0);
+    JsonObject sensor_0 = sensor.createNestedObject();
+    sensor_0["index"] = sensor0.index;
+    sensor_0["value"] = sensor0.value;
+    delay(50);
+    }
+    if (sensor1.avail == true) {
+    digitalWrite(5,HIGH);
+    digitalWrite(4,LOW);
+    digitalWrite(12,LOW);
+    digitalWrite(13,LOW);    
+    delay(50);
+    sensor1.value = analogRead(A0);
+    JsonObject sensor_1 = sensor.createNestedObject();
+    sensor_1["index"] = sensor1.index;
+    sensor_1["value"] = sensor1.value;
     delay(50);
     }
     if (sensor2.avail == true) {
-    multiplex(HIGH,LOW,LOW,LOW);
+    digitalWrite(5,LOW);
+    digitalWrite(4,HIGH);
+    digitalWrite(12,LOW);
+    digitalWrite(13,LOW); 
     delay(50);
-    sensor2.Value = analogRead(A0);
-    send(PlantGroup,sensor2.Plant,sensor2.Type,sensor2.Hardware_ID,sensor2.Value);
-    delay(50);
+    sensor2.value = analogRead(A0);
+    JsonObject sensor_2 = sensor.createNestedObject();
+    sensor_2["index"] = sensor2.index;
+    sensor_2["value"] = sensor2.value;
     }
     if (sensor3.avail == true) {
-      multiplex(LOW,HIGH,LOW,LOW);
-      delay(50);
-      sensor3.Value = analogRead(A0);
-      send(PlantGroup,sensor3.Plant,sensor3.Type,sensor3.Hardware_ID,sensor3.Value);
+    digitalWrite(5,LOW);
+    digitalWrite(4,LOW);
+    digitalWrite(12,HIGH);
+    digitalWrite(13,LOW);
+    sensor3.value = analogRead(A0);
+    JsonObject sensor_3 = sensor.createNestedObject();
+    sensor_3["index"] = sensor3.index;
+    sensor_3["value"] = sensor3.value;
     }
     if (sensor4.avail == true) {
-    digitalWrite(0,LOW);
-    digitalWrite(1,LOW);
-    digitalWrite(2,HIGH);
-    digitalWrite(3,LOW);
-    sensor4.Value = analogRead(A0);
-    send(PlantGroup,sensor4.Plant,sensor4.Type,sensor4.Hardware_ID,sensor4.Value);
-    }
-    if (sensor4.avail == true) {
-    send(PlantGroup,sensor5.Plant,sensor5.Type,sensor5.Hardware_ID,sensor5.Value);
     }
     //Serial.println(String(random(0xffffffff), HEX));
-
+    char buffer[256];
+    serializeJson(doc, buffer);
+    Serial.println(buffer);
+    client.publish("Plants", buffer);
 
     // Add Additional Sensor Readings Here
-    delay(1000);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -137,33 +159,6 @@ void loop() {
   }
 }
 
-
-void send(const char* PlantGroup,const char* Plant,const char* Sensor,int Sensor_ID,int Sensor_Value)
-{
-    StaticJsonDocument<200> doc;
-    doc["Plant_Group"] = PlantGroup;
-    doc["Plant_Name"] = Plant;
-    doc["Sensor_Type"] = Sensor; 
-    doc["Sensor_ID"] = Sensor_ID; 
-    doc["Sensor_Value"] = Sensor_Value;
-    char buffer[256];
-    serializeJson(doc, buffer);
-    Serial.println(buffer);
-    client.publish("Plants", buffer);
-}
-
-int dummy_value(int currentValue){
-    randDifference = random(-5, 11);
-    currentValue = currentValue + randDifference;
-    if (currentValue <= 0) {
-      currentValue = 0;
-    }
-    else if (currentValue >= 100) {
-      currentValue = 100;
-      }
-    else {
-    }
-}
 void multiplex(int pin1,int pin2,int pin3,int pin4){
     digitalWrite(mplex1,pin1);
     digitalWrite(mplex2,pin2);

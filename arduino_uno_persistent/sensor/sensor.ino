@@ -5,7 +5,8 @@
 
 //Parameters 
 
-const char* PlantGroup = "Living Room Corner";    
+const char* PlantGroup = "Living_Room_";
+
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress ip(192, 168, 0, 51);
 IPAddress myDns(192, 168, 0, 1);
@@ -24,7 +25,7 @@ struct sensor sensor0{true ,NULL,0};
 struct sensor sensor1{true ,NULL,1};
 struct sensor sensor2{true ,NULL,2};
 struct sensor sensor3{true ,NULL,3};
-struct sensor sensor4{true ,NULL,4};
+struct sensor sensor4{false ,NULL,4};
 
 
 unsigned long lastMsg = 0;
@@ -103,20 +104,6 @@ void loop() {
   }
 }
 
-
-void send(const char* PlantGroup,const char* Plant,const char* Sensor,int Sensor_ID,float Sensor_Value)
-{
-    StaticJsonDocument<200> doc;
-    doc["Plant_Group"] = PlantGroup;
-    doc["Plant_Name"] = Plant;
-    doc["Sensor_Type"] = Sensor; 
-    doc["Sensor_ID"] = Sensor_ID; 
-    doc["Sensor_Value"] = Sensor_Value;
-    char buffer[256];
-    serializeJson(doc, buffer);
-    Serial.println(buffer);
-    client.publish("Plants", buffer);
-}
  float sensorread (int reading, const float high, const float low) {
       return (1 - ((reading - high) / (low - high)));
     };
