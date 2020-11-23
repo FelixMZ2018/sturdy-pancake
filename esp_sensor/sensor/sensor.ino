@@ -67,13 +67,16 @@ void setup() {
   Serial.println(WiFi.localIP());         // Send the IP address of the ESP8266 to the computer
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
   client.setServer(MQTTBROKER, 1883);
+  pinMode(14,INPUT);
+  pinMode(2, OUTPUT);
   pinMode(5, OUTPUT);
   pinMode(4, OUTPUT);
   pinMode(12, OUTPUT);
   pinMode(13, OUTPUT);
+  digitalWrite(2,LOW);
   digitalWrite(5,LOW);
   digitalWrite(4,LOW);
-  digitalWrite(12,LOW);
+  digitalWrite(12,LOW);   
   digitalWrite(13,LOW);  
 
 }
@@ -91,63 +94,55 @@ void loop() {
     if (client.connect("arduinoClient")) {
       Serial.println("connected");
   // print out the value you read:
-    StaticJsonDocument<200> doc;
+    StaticJsonDocument<500> doc;
     doc["Plant_Group"] = PlantGroup;
     JsonArray sensor = doc.createNestedArray("sensor");
     if (sensor0.avail == true) {
-    multiplex(LOW,LOW,LOW,LOW);
-    digitalWrite(5,HIGH);
-    digitalWrite(4,HIGH);
-    digitalWrite(12,HIGH);
-    digitalWrite(13,HIGH);  
-    delay(50);
-    sensor0.value = analogRead(A0);
-    JsonObject sensor_0 = sensor.createNestedObject();
-    sensor_0["index"] = sensor0.index;
-    sensor_0["value"] = sensor0.value;
-    delay(50);
+        multiplex(LOW,LOW,LOW,LOW);
+        delay(50);
+        sensor0.value = analogRead(A0);
+        JsonObject sensor_0 = sensor.createNestedObject();
+        sensor_0["index"] = sensor0.index;
+        sensor_0["value"] = sensor0.value;
+        delay(50);
     }
     if (sensor1.avail == true) {
-    digitalWrite(5,HIGH);
-    digitalWrite(4,LOW);
-    digitalWrite(12,LOW);
-    digitalWrite(13,LOW);    
-    delay(50);
-    sensor1.value = analogRead(A0);
-    JsonObject sensor_1 = sensor.createNestedObject();
-    sensor_1["index"] = sensor1.index;
-    sensor_1["value"] = sensor1.value;
-    delay(50);
+        multiplex(HIGH,LOW,LOW,LOW);
+        delay(50);
+        sensor1.value = analogRead(A0);
+        JsonObject sensor_1 = sensor.createNestedObject();
+        sensor_1["index"] = sensor1.index;
+        sensor_1["value"] = sensor1.value;
+        delay(50);
     }
     if (sensor2.avail == true) {
-    digitalWrite(5,LOW);
-    digitalWrite(4,HIGH);
-    digitalWrite(12,LOW);
-    digitalWrite(13,LOW); 
-    delay(50);
-    sensor2.value = analogRead(A0);
-    JsonObject sensor_2 = sensor.createNestedObject();
-    sensor_2["index"] = sensor2.index;
-    sensor_2["value"] = sensor2.value;
+        multiplex(LOW,HIGH,LOW,LOW);
+        delay(50);
+        sensor2.value = analogRead(A0);
+        JsonObject sensor_2 = sensor.createNestedObject();
+        sensor_2["index"] = sensor2.index;
+        sensor_2["value"] = sensor2.value;
     }
     if (sensor3.avail == true) {
-    digitalWrite(5,LOW);
-    digitalWrite(4,LOW);
-    digitalWrite(12,HIGH);
-    digitalWrite(13,LOW);
-    sensor3.value = analogRead(A0);
-    JsonObject sensor_3 = sensor.createNestedObject();
-    sensor_3["index"] = sensor3.index;
-    sensor_3["value"] = sensor3.value;
+        multiplex(HIGH,HIGH,LOW,LOW);
+        delay(50);
+        sensor3.value = analogRead(A0);
+        JsonObject sensor_3 = sensor.createNestedObject();
+        sensor_3["index"] = sensor3.index;
+        sensor_3["value"] = sensor3.value;
     }
     if (sensor4.avail == true) {
+        multiplex(LOW,LOW,HIGH,LOW);
+        delay(50);
+        sensor4.value = analogRead(A0);
+        JsonObject sensor_4 = sensor.createNestedObject();
+        sensor_4["index"] = sensor4.index;
+        sensor_4["value"] = sensor4.value;
     }
-    //Serial.println(String(random(0xffffffff), HEX));
     char buffer[256];
     serializeJson(doc, buffer);
     Serial.println(buffer);
     client.publish("Plants", buffer);
-
     // Add Additional Sensor Readings Here
     } else {
       Serial.print("failed, rc=");
