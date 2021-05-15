@@ -1,28 +1,13 @@
 # sturdy-pancake
 
 # Hardware 
-- ESP2866 
-- CD74HC4067 Multiplexer
+- ESP2866 / Upgraded to ESP32 due to additional GPIO Pins
+- MCP3008 Multiplexer
 - Capacitive Soil Moisture Sensor
 
-TRUTH TABLE 
-S0 S1 S2 S3 E
-SELECTED
-CHANNEL
-XXXX None
-0000 0
-1000 1
-0100 2
-1100 3
-0010 4
-1010 5
-0110 6
-1110 7
-0001 8
-1001 9
-0101 10
-1101 11
-0011 12
-1011 13
-0111 14
-1111 15
+## Update
+
+Most capactivie soil moisture sensors now seem to rely on the NE555 Chip, this causes an issue as this means they work on 5V rather than 3.3V
+to remedy this the next iteration of the design is using 2 VCC lines, one VIN (5V) and one 3.3V for logic purposes.
+Switching them will require a voltage divider between the AO of each sensor and the MCP3008 input
+A custom PCB will have connectors for ESP based dev boards as well as Raspberry Pi Zero boards. 
